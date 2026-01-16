@@ -1,0 +1,52 @@
+# 仿真生成的文件
+*.vcd
+*.vpd
+*.fsdb
+*.wlf
+*.log
+
+# 编译生成的文件
+*.o
+*.so
+*.a
+*.exe
+*.out
+
+# 构建目录
+build/
+obj/
+
+# 临时文件
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# IDE文件
+.vscode/
+.idea/
+*.sublime-*
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 文档
+*.pdf
+*.doc
+*.docx
+
+# 归档
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
