@@ -4,17 +4,17 @@ module zero_skipping (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in,
+    input wire [15:0] data_in,
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out,
+    output wire [15:0] data_out,
     output wire valid_out,
     input wire ready_out,
     
     output wire skip_flag
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg;
+    reg [15:0] data_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
     reg skip_flag_reg;
@@ -31,7 +31,7 @@ module zero_skipping (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_reg <= {DATA_WIDTH{1'b0}};
+            data_out_reg <= {16{1'b0}};
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b1;
             skip_flag_reg <= 1'b0;
@@ -47,9 +47,9 @@ module zero_skipping (
                 
                 CHECK: begin
                     ready_in_reg <= 1'b0;
-                    if (data_in == {DATA_WIDTH{1'b0}}) begin
+                    if (data_in == {16{1'b0}}) begin
                         skip_flag_reg <= 1'b1;
-                        data_out_reg <= {DATA_WIDTH{1'b0}};
+                        data_out_reg <= {16{1'b0}};
                         valid_out_reg <= 1'b0;
                         skip_state <= IDLE;
                     end else begin

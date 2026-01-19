@@ -6,37 +6,37 @@ module xy_router (
     input wire [4:0] router_x,
     input wire [4:0] router_y,
     
-    input wire [DATA_WIDTH-1:0] data_in_north,
+    input wire [15:0] data_in_north,
     input wire valid_in_north,
     output wire ready_in_north,
-    output wire [DATA_WIDTH-1:0] data_out_north,
+    output wire [15:0] data_out_north,
     output wire valid_out_north,
     input wire ready_out_north,
     
-    input wire [DATA_WIDTH-1:0] data_in_south,
+    input wire [15:0] data_in_south,
     input wire valid_in_south,
     output wire ready_in_south,
-    output wire [DATA_WIDTH-1:0] data_out_south,
+    output wire [15:0] data_out_south,
     output wire valid_out_south,
     input wire ready_out_south,
     
-    input wire [DATA_WIDTH-1:0] data_in_east,
+    input wire [15:0] data_in_east,
     input wire valid_in_east,
     output wire ready_in_east,
-    output wire [DATA_WIDTH-1:0] data_out_east,
+    output wire [15:0] data_out_east,
     output wire valid_out_east,
     input wire ready_out_east,
     
-    input wire [DATA_WIDTH-1:0] data_in_west,
+    input wire [15:0] data_in_west,
     input wire valid_in_west,
     output wire ready_in_west,
-    output wire [DATA_WIDTH-1:0] data_out_west,
+    output wire [15:0] data_out_west,
     output wire valid_out_west,
     input wire ready_out_west
 );
 
-    reg [DATA_WIDTH-1:0] data_out_north_reg, data_out_south_reg;
-    reg [DATA_WIDTH-1:0] data_out_east_reg, data_out_west_reg;
+    reg [15:0] data_out_north_reg, data_out_south_reg;
+    reg [15:0] data_out_east_reg, data_out_west_reg;
     reg valid_out_north_reg, valid_out_south_reg;
     reg valid_out_east_reg, valid_out_west_reg;
     reg ready_in_north_reg, ready_in_south_reg;
@@ -64,10 +64,10 @@ module xy_router (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_north_reg <= {DATA_WIDTH{1'b0}};
-            data_out_south_reg <= {DATA_WIDTH{1'b0}};
-            data_out_east_reg <= {DATA_WIDTH{1'b0}};
-            data_out_west_reg <= {DATA_WIDTH{1'b0}};
+            data_out_north_reg <= {16{1'b0}};
+            data_out_south_reg <= {16{1'b0}};
+            data_out_east_reg <= {16{1'b0}};
+            data_out_west_reg <= {16{1'b0}};
             valid_out_north_reg <= 1'b0;
             valid_out_south_reg <= 1'b0;
             valid_out_east_reg <= 1'b0;

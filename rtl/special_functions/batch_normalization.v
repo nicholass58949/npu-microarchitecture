@@ -4,25 +4,25 @@ module batch_normalization (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in,
+    input wire [15:0] data_in,
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out,
+    output wire [15:0] data_out,
     output wire valid_out,
     input wire ready_out,
     
-    input wire [DATA_WIDTH-1:0] gamma,
-    input wire [DATA_WIDTH-1:0] beta,
-    input wire [DATA_WIDTH-1:0] mean,
-    input wire [DATA_WIDTH-1:0] variance
+    input wire [15:0] gamma,
+    input wire [15:0] beta,
+    input wire [15:0] mean,
+    input wire [15:0] variance
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg;
+    reg [15:0] data_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
     reg [2:0] bn_state;
-    reg signed [DATA_WIDTH*2-1:0] normalized;
-    reg signed [DATA_WIDTH*2-1:0] temp;
+    reg signed [16*2-1:0] normalized;
+    reg signed [16*2-1:0] temp;
 
     assign data_out = data_out_reg;
     assign valid_out = valid_out_reg;
@@ -34,12 +34,12 @@ module batch_normalization (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_reg <= {DATA_WIDTH{1'b0}};
+            data_out_reg <= {16{1'b0}};
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b1;
             bn_state <= IDLE;
-            normalized <= {DATA_WIDTH*2{1'b0}};
-            temp <= {DATA_WIDTH*2{1'b0}};
+            normalized <= {16*2{1'b0}};
+            temp <= {16*2{1'b0}};
         end else begin
             case (bn_state)
                 IDLE: begin
@@ -53,7 +53,7 @@ module batch_normalization (
                     ready_in_reg <= 1'b0;
                     temp <= ($signed(data_in) - $signed(mean)) * $signed(gamma);
                     normalized <= temp / ($signed(variance) + 16'sd1);
-                    data_out_reg <= normalized[DATA_WIDTH-1:0] + $signed(beta);
+                    data_out_reg <= normalized[16-1:0] + $signed(beta);
                     bn_state <= OUTPUT;
                 end
                 

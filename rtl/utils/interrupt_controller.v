@@ -4,49 +4,34 @@ module interrupt_controller (
     input wire clk,
     input wire rst_n,
     
-    input wire [7:0] irq_lines,
-    output wire [7:0] irq_mask,
-    output wire irq_output,
-    
-    input wire [2:0] irq_ack,
-    output wire [2:0] irq_id
+    input wire interrupt_req,
+    output wire interrupt_ack,
+    input wire [7:0] interrupt_id,
+    output wire interrupt
 );
 
-    reg [7:0] irq_mask_reg;
-    reg irq_output_reg;
-    reg [2:0] irq_id_reg;
-    reg [7:0] pending_irq;
+    reg interrupt_ack_reg;
+    reg interrupt_reg;
+    reg [7:0] interrupt_id_reg;
 
-    assign irq_mask = irq_mask_reg;
-    assign irq_output = irq_output_reg;
-    assign irq_id = irq_id_reg;
+    assign interrupt_ack = interrupt_ack_reg;
+    assign interrupt = interrupt_reg;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            irq_mask_reg <= 8'd0;
-            irq_output_reg <= 1'b0;
-            irq_id_reg <= 3'd0;
-            pending_irq <= 8'd0;
+            interrupt_ack_reg <= 1'b0;
+            interrupt_reg <= 1'b0;
+            interrupt_id_reg <= 8'd0;
         end else begin
-            pending_irq <= irq_lines & ~irq_mask_reg;
-            
-            if (pending_irq != 8'd0 && !irq_output_reg) begin
-                irq_output_reg <= 1'b1;
-                case (1'b1)
-                    pending_irq[0]: irq_id_reg <= 3'd0;
-                    pending_irq[1]: irq_id_reg <= 3'd1;
-                    pending_irq[2]: irq_id_reg <= 3'd2;
-                    pending_irq[3]: irq_id_reg <= 3'd3;
-                    pending_irq[4]: irq_id_reg <= 3'd4;
-                    pending_irq[5]: irq_id_reg <= 3'd5;
-                    pending_irq[6]: irq_id_reg <= 3'd6;
-                    pending_irq[7]: irq_id_reg <= 3'd7;
-                    default: irq_id_reg <= 3'd0;
-                endcase
+            if (interrupt_req && !interrupt_ack_reg) begin
+                interrupt_ack_reg <= 1'b1;
+                interrupt_reg <= 1'b1;
+                interrupt_id_reg <= interrupt_id;
             end
             
-            if (irq_ack == irq_id_reg) begin
-                irq_output_reg <= 1'b0;
+            if (interrupt_ack_reg) begin
+                interrupt_ack_reg <= 1'b0;
+                interrupt_reg <= 1'b0;
             end
         end
     end

@@ -4,40 +4,43 @@ module processing_element (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] input_data,
+    input wire [15:0] input_data,
     input wire input_valid,
     output reg input_ready,
     
-    input wire [DATA_WIDTH-1:0] weight_data,
+    input wire [15:0] weight_data,
     input wire weight_valid,
     output reg weight_ready,
     
-    output wire [ACC_WIDTH-1:0] output_data,
+    output wire [39:0] output_data,
     output wire output_valid,
     input wire output_ready,
     
-    input wire [DATA_WIDTH-1:0] noc_data_in,
+    input wire [15:0] noc_data_in,
     input wire noc_valid_in,
     output wire noc_ready_in,
-    output wire [DATA_WIDTH-1:0] noc_data_out,
+    output wire [15:0] noc_data_out,
     output wire noc_valid_out,
     input wire noc_ready_out,
     
-    input activation_type_t act_type,
+    input wire [1:0] act_type,
     input wire [3:0] pe_id
 );
 
-    wire [DATA_WIDTH-1:0] reg_rdata_a, reg_rdata_b;
-    wire [ACC_WIDTH-1:0] mac_acc_out;
+    wire [15:0] reg_rdata_a, reg_rdata_b;
+    wire [39:0] mac_acc_out;
     wire mac_done;
-    wire [DATA_WIDTH-1:0] act_data_out;
+    wire [15:0] act_data_out;
     wire act_valid_out;
+    wire [3:0] pe_id_plus_one;
     
-    reg [DATA_WIDTH-1:0] input_reg;
-    reg [DATA_WIDTH-1:0] weight_reg;
-    reg [ACC_WIDTH-1:0] acc_reg;
+    reg [15:0] input_reg;
+    reg [15:0] weight_reg;
+    reg [39:0] acc_reg;
     reg [2:0] pe_state;
     reg acc_rst;
+
+    assign pe_id_plus_one = pe_id + 1'b1;
 
     localparam IDLE = 3'd0;
     localparam LOAD = 3'd1;
@@ -52,10 +55,10 @@ module processing_element (
         .clk(clk),
         .rst_n(rst_n),
         .wdata(input_data),
-        .waddr(pe_id),
+        .waddr(pe_id[3:0]),
         .we(input_valid && input_ready),
-        .raddr_a(pe_id),
-        .raddr_b(pe_id + 1),
+        .raddr_a(pe_id[3:0]),
+        .raddr_b(pe_id_plus_one[3:0]),
         .rdata_a(reg_rdata_a),
         .rdata_b(reg_rdata_b)
     );
@@ -86,9 +89,9 @@ module processing_element (
         if (!rst_n) begin
             input_ready <= 1'b0;
             weight_ready <= 1'b0;
-            input_reg <= {DATA_WIDTH{1'b0}};
-            weight_reg <= {DATA_WIDTH{1'b0}};
-            acc_reg <= {ACC_WIDTH{1'b0}};
+            input_reg <= {16{1'b0}};
+            weight_reg <= {16{1'b0}};
+            acc_reg <= {40{1'b0}};
             pe_state <= IDLE;
             acc_rst <= 1'b0;
         end else begin

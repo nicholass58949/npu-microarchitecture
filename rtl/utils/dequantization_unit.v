@@ -4,22 +4,22 @@ module dequantization_unit (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in,
+    input wire [15:0] data_in,
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out,
+    output wire [15:0] data_out,
     output wire valid_out,
     input wire ready_out,
     
-    input wire [DATA_WIDTH-1:0] scale,
-    input wire [DATA_WIDTH-1:0] zero_point
+    input wire [15:0] scale,
+    input wire [15:0] zero_point
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg;
+    reg [15:0] data_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
     reg [1:0] dequant_state;
-    reg signed [DATA_WIDTH*2-1:0] dequantized;
+    reg signed [16*2-1:0] dequantized;
 
     assign data_out = data_out_reg;
     assign valid_out = valid_out_reg;
@@ -31,11 +31,11 @@ module dequantization_unit (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_reg <= {DATA_WIDTH{1'b0}};
+            data_out_reg <= {16{1'b0}};
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b1;
             dequant_state <= IDLE;
-            dequantized <= {DATA_WIDTH*2{1'b0}};
+            dequantized <= {16*2{1'b0}};
         end else begin
             case (dequant_state)
                 IDLE: begin
@@ -48,7 +48,7 @@ module dequantization_unit (
                 DEQUANTIZE: begin
                     ready_in_reg <= 1'b0;
                     dequantized <= ($signed(data_in) - $signed(zero_point)) * $signed(scale);
-                    data_out_reg <= dequantized[DATA_WIDTH-1:0];
+                    data_out_reg <= dequantized[16-1:0];
                     dequant_state <= OUTPUT;
                 end
                 

@@ -4,31 +4,31 @@ module memory_arbiter (
     input wire clk,
     input wire rst_n,
     
-    input wire [ADDR_WIDTH-1:0] req0_addr,
-    input wire [DATA_WIDTH-1:0] req0_wdata,
-    output wire [DATA_WIDTH-1:0] req0_rdata,
+    input wire [31:0] req0_addr,
+    input wire [15:0] req0_wdata,
+    output wire [15:0] req0_rdata,
     input wire req0_we,
     input wire req0_ce,
     output wire req0_ready,
     
-    input wire [ADDR_WIDTH-1:0] req1_addr,
-    input wire [DATA_WIDTH-1:0] req1_wdata,
-    output wire [DATA_WIDTH-1:0] req1_rdata,
+    input wire [31:0] req1_addr,
+    input wire [15:0] req1_wdata,
+    output wire [15:0] req1_rdata,
     input wire req1_we,
     input wire req1_ce,
     output wire req1_ready,
     
-    output wire [ADDR_WIDTH-1:0] mem_addr,
-    output wire [DATA_WIDTH-1:0] mem_wdata,
-    input wire [DATA_WIDTH-1:0] mem_rdata,
+    output wire [31:0] mem_addr,
+    output wire [15:0] mem_wdata,
+    input wire [15:0] mem_rdata,
     output wire mem_we,
     output wire mem_ce
 );
 
-    reg [DATA_WIDTH-1:0] req0_rdata_reg, req1_rdata_reg;
+    reg [15:0] req0_rdata_reg, req1_rdata_reg;
     reg req0_ready_reg, req1_ready_reg;
-    reg [ADDR_WIDTH-1:0] mem_addr_reg;
-    reg [DATA_WIDTH-1:0] mem_wdata_reg;
+    reg [31:0] mem_addr_reg;
+    reg [15:0] mem_wdata_reg;
     reg mem_we_reg, mem_ce_reg;
     reg arbiter_select;
 
@@ -45,8 +45,8 @@ module memory_arbiter (
         if (!rst_n) begin
             req0_ready_reg <= 1'b1;
             req1_ready_reg <= 1'b1;
-            mem_addr_reg <= {ADDR_WIDTH{1'b0}};
-            mem_wdata_reg <= {DATA_WIDTH{1'b0}};
+            mem_addr_reg <= {32{1'b0}};
+            mem_wdata_reg <= {16{1'b0}};
             mem_we_reg <= 1'b0;
             mem_ce_reg <= 1'b0;
             arbiter_select <= 1'b0;

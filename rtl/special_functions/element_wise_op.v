@@ -4,18 +4,18 @@ module element_wise_op (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] operand_a,
-    input wire [DATA_WIDTH-1:0] operand_b,
+    input wire [15:0] operand_a,
+    input wire [15:0] operand_b,
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out,
+    output wire [15:0] data_out,
     output wire valid_out,
     input wire ready_out,
     
     input wire [2:0] op_type
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg;
+    reg [15:0] data_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
     reg [2:0] elem_state;
@@ -30,7 +30,7 @@ module element_wise_op (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_reg <= {DATA_WIDTH{1'b0}};
+            data_out_reg <= {16{1'b0}};
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b1;
             elem_state <= IDLE;

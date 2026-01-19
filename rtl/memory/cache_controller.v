@@ -4,33 +4,33 @@ module cache_controller (
     input wire clk,
     input wire rst_n,
     
-    input wire [ADDR_WIDTH-1:0] cpu_addr,
-    input wire [DATA_WIDTH-1:0] cpu_wdata,
-    output wire [DATA_WIDTH-1:0] cpu_rdata,
+    input wire [31:0] cpu_addr,
+    input wire [15:0] cpu_wdata,
+    output wire [15:0] cpu_rdata,
     input wire cpu_we,
     input wire cpu_ce,
     output wire cpu_ready,
     
-    output wire [ADDR_WIDTH-1:0] mem_addr,
-    input wire [DATA_WIDTH-1:0] mem_rdata,
+    output wire [31:0] mem_addr,
+    input wire [15:0] mem_rdata,
     output wire mem_ce
 );
 
     parameter CACHE_SIZE = 256;
     parameter LINE_SIZE = 4;
 
-    reg [DATA_WIDTH-1:0] cache_data [0:CACHE_SIZE-1];
-    reg [ADDR_WIDTH-1:0] cache_tag [0:63];
+    reg [15:0] cache_data [0:CACHE_SIZE-1];
+    reg [31:0] cache_tag [0:63];
     reg [63:0] cache_valid;
     reg [63:0] cache_dirty;
     
-    reg [DATA_WIDTH-1:0] cpu_rdata_reg;
+    reg [15:0] cpu_rdata_reg;
     reg cpu_ready_reg;
     reg [2:0] cache_state;
     
-    reg [ADDR_WIDTH-1:0] current_addr;
+    reg [31:0] current_addr;
     reg [5:0] cache_index;
-    reg [ADDR_WIDTH-1:6] cache_tag_in;
+    reg [31:8] cache_tag_in;
     reg [1:0] cache_offset;
 
     assign cpu_rdata = cpu_rdata_reg;
@@ -47,10 +47,10 @@ module cache_controller (
         if (!rst_n) begin
             cache_state <= IDLE;
             cpu_ready_reg <= 1'b1;
-            cpu_rdata_reg <= {DATA_WIDTH{1'b0}};
+            cpu_rdata_reg <= {16{1'b0}};
             cache_valid <= 64'd0;
             cache_dirty <= 64'd0;
-            current_addr <= {ADDR_WIDTH{1'b0}};
+            current_addr <= {32{1'b0}};
         end else begin
             case (cache_state)
                 IDLE: begin
@@ -58,7 +58,7 @@ module cache_controller (
                     if (cpu_ce) begin
                         current_addr <= cpu_addr;
                         cache_index <= cpu_addr[7:2];
-                        cache_tag_in <= cpu_addr[ADDR_WIDTH-1:8];
+                        cache_tag_in <= cpu_addr[32-1:8];
                         cache_offset <= cpu_addr[1:0];
                         cache_state <= CHECK_CACHE;
                     end

@@ -30,7 +30,7 @@ echo Creating build directory...
 if not exist %BUILD_DIR% mkdir %BUILD_DIR%
 
 echo Compiling RTL and simulation files...
-%IVERILOG% -o %BUILD_DIR%\npu_sim -I %COMMON_DIR% ^
+%IVERILOG% -g2005-sv -o %BUILD_DIR%\npu_sim -I %COMMON_DIR% ^
 	%COMMON_DIR%\host_interface.v ^
 	%COMMON_DIR%\npu_top.v ^
 	%COMPUTE_DIR%\mac_unit.v ^

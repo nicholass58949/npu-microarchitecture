@@ -4,19 +4,19 @@ module load_balancer (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] task_data,
+    input wire [15:0] task_data,
     input wire task_valid,
     output reg task_ready,
     
-    output wire [DATA_WIDTH-1:0] pe_task_data [PE_ROWS*PE_COLS-1:0],
-    output wire pe_task_valid [PE_ROWS*PE_COLS-1:0],
-    input wire pe_task_ready [PE_ROWS*PE_COLS-1:0]
+    output wire [15:0] pe_task_data [0:63],
+    output wire pe_task_valid [0:63],
+    input wire pe_task_ready [0:63]
 );
 
-    reg [DATA_WIDTH-1:0] pe_task_data_reg [PE_ROWS*PE_COLS-1:0];
-    reg pe_task_valid_reg [PE_ROWS*PE_COLS-1:0];
-    reg [3:0] pe_load_count [PE_ROWS*PE_COLS-1:0];
-    reg [4:0] current_pe;
+    reg [15:0] pe_task_data_reg [0:63];
+    reg pe_task_valid_reg [0:63];
+    reg [3:0] pe_load_count [0:63];
+    reg [5:0] current_pe;
     reg [2:0] balancer_state;
 
     assign pe_task_data = pe_task_data_reg;
@@ -29,15 +29,9 @@ module load_balancer (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            task_ready <= 1'b1;
-            current_pe <= 5'd0;
+            task_ready <= 1'b0;
+            current_pe <= 6'd0;
             balancer_state <= IDLE;
-            
-            for (integer i = 0; i < PE_ROWS*PE_COLS; i = i + 1) begin
-                pe_task_data_reg[i] <= {DATA_WIDTH{1'b0}};
-                pe_task_valid_reg[i] <= 1'b0;
-                pe_load_count[i] <= 4'd0;
-            end
         end else begin
             case (balancer_state)
                 IDLE: begin
@@ -49,26 +43,19 @@ module load_balancer (
                 
                 SELECT_PE: begin
                     task_ready <= 1'b0;
-                    current_pe <= 5'd0;
+                    current_pe <= current_pe + 1'b1;
+                    if (current_pe == 6'd63) begin
+                        current_pe <= 6'd0;
+                    end
                     balancer_state <= DISPATCH;
                 end
                 
                 DISPATCH: begin
                     pe_task_data_reg[current_pe] <= task_data;
                     pe_task_valid_reg[current_pe] <= 1'b1;
-                    pe_load_count[current_pe] <= pe_load_count[current_pe] + 1'b1;
-                    balancer_state <= WAIT_ACK;
-                end
-                
-                WAIT_ACK: begin
                     if (pe_task_ready[current_pe]) begin
                         pe_task_valid_reg[current_pe] <= 1'b0;
-                        if (current_pe < PE_ROWS*PE_COLS - 1) begin
-                            current_pe <= current_pe + 1'b1;
-                            balancer_state <= DISPATCH;
-                        end else begin
-                            balancer_state <= IDLE;
-                        end
+                        balancer_state <= IDLE;
                     end
                 end
                 

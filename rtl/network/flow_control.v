@@ -4,17 +4,17 @@ module flow_control (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in,
+    input wire [15:0] data_in,
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out,
+    output wire [15:0] data_out,
     output wire valid_out,
     input wire ready_out,
     
     input wire credit_available
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg;
+    reg [15:0] data_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
     reg [7:0] credit_count;
@@ -25,7 +25,7 @@ module flow_control (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_reg <= {DATA_WIDTH{1'b0}};
+            data_out_reg <= {16{1'b0}};
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b0;
             credit_count <= 8'd0;

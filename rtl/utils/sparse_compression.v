@@ -4,16 +4,16 @@ module sparse_compression (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in [0:15],
+    input wire [15:0] data_in [0:15],
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out [0:15],
+    output wire [15:0] data_out [0:15],
     output wire [15:0] index_out,
     output wire valid_out,
     input wire ready_out
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg [0:15];
+    reg [15:0] data_out_reg [0:15];
     reg [15:0] index_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
@@ -34,7 +34,7 @@ module sparse_compression (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (integer i = 0; i < 16; i = i + 1) begin
-                data_out_reg[i] <= {DATA_WIDTH{1'b0}};
+                data_out_reg[i] <= {16{1'b0}};
             end
             index_out_reg <= 16'd0;
             valid_out_reg <= 1'b0;
@@ -56,7 +56,7 @@ module sparse_compression (
                     non_zero_count <= 4'd0;
                     write_ptr <= 4'd0;
                     for (integer i = 0; i < 16; i = i + 1) begin
-                        if (data_in[i] != {DATA_WIDTH{1'b0}}) begin
+                        if (data_in[i] != {16{1'b0}}) begin
                             non_zero_count <= non_zero_count + 1'b1;
                         end
                     end
@@ -65,7 +65,7 @@ module sparse_compression (
                 
                 COMPRESS: begin
                     for (integer i = 0; i < 16; i = i + 1) begin
-                        if (data_in[i] != {DATA_WIDTH{1'b0}}) begin
+                        if (data_in[i] != {16{1'b0}}) begin
                             data_out_reg[write_ptr] <= data_in[i];
                             index_out_reg[write_ptr] <= 1'b1;
                             write_ptr <= write_ptr + 1'b1;

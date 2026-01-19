@@ -4,10 +4,10 @@ module slice_unit (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in [0:63],
+    input wire [15:0] data_in [0:63],
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out [0:15],
+    output wire [15:0] data_out [0:15],
     output wire valid_out,
     input wire ready_out,
     
@@ -15,7 +15,7 @@ module slice_unit (
     input wire [5:0] end_idx
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg [0:15];
+    reg [15:0] data_out_reg [0:15];
     reg valid_out_reg;
     reg ready_in_reg;
     reg [1:0] slice_state;
@@ -31,7 +31,7 @@ module slice_unit (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (integer i = 0; i < 16; i = i + 1) begin
-                data_out_reg[i] <= {DATA_WIDTH{1'b0}};
+                data_out_reg[i] <= {16{1'b0}};
             end
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b1;
@@ -51,7 +51,7 @@ module slice_unit (
                         if (start_idx + i <= end_idx) begin
                             data_out_reg[i] <= data_in[start_idx + i];
                         end else begin
-                            data_out_reg[i] <= {DATA_WIDTH{1'b0}};
+                            data_out_reg[i] <= {16{1'b0}};
                         end
                     end
                     slice_state <= OUTPUT;

@@ -4,16 +4,16 @@ module concat_unit (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in_a,
-    input wire [DATA_WIDTH-1:0] data_in_b,
+    input wire [15:0] data_in_a,
+    input wire [15:0] data_in_b,
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH*2-1:0] data_out,
+    output wire [16*2-1:0] data_out,
     output wire valid_out,
     input wire ready_out
 );
 
-    reg [DATA_WIDTH*2-1:0] data_out_reg;
+    reg [16*2-1:0] data_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
     reg [1:0] concat_state;
@@ -28,7 +28,7 @@ module concat_unit (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_reg <= {DATA_WIDTH*2{1'b0}};
+            data_out_reg <= {16*2{1'b0}};
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b1;
             concat_state <= IDLE;

@@ -4,25 +4,25 @@ module quantization_unit (
     input wire clk,
     input wire rst_n,
     
-    input wire [DATA_WIDTH-1:0] data_in,
+    input wire [15:0] data_in,
     input wire valid_in,
     output wire ready_in,
-    output wire [DATA_WIDTH-1:0] data_out,
+    output wire [15:0] data_out,
     output wire valid_out,
     input wire ready_out,
     
-    input wire [DATA_WIDTH-1:0] scale,
-    input wire [DATA_WIDTH-1:0] zero_point,
+    input wire [15:0] scale,
+    input wire [15:0] zero_point,
     input wire [1:0] input_bits,
     input wire [1:0] output_bits
 );
 
-    reg [DATA_WIDTH-1:0] data_out_reg;
+    reg [15:0] data_out_reg;
     reg valid_out_reg;
     reg ready_in_reg;
     reg [2:0] quant_state;
-    reg signed [DATA_WIDTH*2-1:0] scaled;
-    reg signed [DATA_WIDTH-1:0] quantized;
+    reg signed [16*2-1:0] scaled;
+    reg signed [16-1:0] quantized;
 
     assign data_out = data_out_reg;
     assign valid_out = valid_out_reg;
@@ -35,12 +35,12 @@ module quantization_unit (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            data_out_reg <= {DATA_WIDTH{1'b0}};
+            data_out_reg <= {16{1'b0}};
             valid_out_reg <= 1'b0;
             ready_in_reg <= 1'b1;
             quant_state <= IDLE;
-            scaled <= {DATA_WIDTH*2{1'b0}};
-            quantized <= {DATA_WIDTH{1'b0}};
+            scaled <= {16*2{1'b0}};
+            quantized <= {16{1'b0}};
         end else begin
             case (quant_state)
                 IDLE: begin
@@ -61,7 +61,7 @@ module quantization_unit (
                         2'd0: quantized <= scaled[7:0] + $signed(zero_point);
                         2'd1: quantized <= scaled[15:0] + $signed(zero_point);
                         2'd2: quantized <= scaled[31:0] + $signed(zero_point);
-                        default: quantized <= scaled[DATA_WIDTH-1:0] + $signed(zero_point);
+                        default: quantized <= scaled[16-1:0] + $signed(zero_point);
                     endcase
                     data_out_reg <= quantized;
                     quant_state <= OUTPUT;

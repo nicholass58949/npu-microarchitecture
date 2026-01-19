@@ -3,27 +3,27 @@
 module global_buffer (
     input wire clk,
     input wire rst_n,
-    input wire [DATA_WIDTH-1:0] wdata,
-    input wire [ADDR_WIDTH-1:0] addr,
+    input wire [15:0] wdata,
+    input wire [31:0] addr,
     input wire we,
     input wire ce,
-    output reg [DATA_WIDTH-1:0] rdata
+    output reg [15:0] rdata
 );
 
-    reg [DATA_WIDTH-1:0] memory [0:BUFFER_SIZE-1];
-    reg [DATA_WIDTH-1:0] rdata_reg;
+    reg [15:0] memory [0:1024-1];
+    reg [15:0] rdata_reg;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            rdata_reg <= {DATA_WIDTH{1'b0}};
+            rdata_reg <= {16{1'b0}};
         end else if (ce && !we) begin
-            rdata_reg <= memory[addr[ADDR_WIDTH-1:0]];
+            rdata_reg <= memory[addr[32-1:0]];
         end
     end
 
     always @(posedge clk) begin
         if (ce && we) begin
-            memory[addr[ADDR_WIDTH-1:0]] <= wdata;
+            memory[addr[32-1:0]] <= wdata;
         end
     end
 
