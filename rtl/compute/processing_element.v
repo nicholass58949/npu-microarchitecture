@@ -50,6 +50,60 @@ module processing_element (
 
     assign output_data = act_data_out;
     assign output_valid = act_valid_out && output_ready;
+    
+    // State transition logic
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            pe_state <= IDLE;
+            input_ready <= 1'b1;
+            weight_ready <= 1'b1;
+            acc_rst <= 1'b1;
+        end else begin
+            case (pe_state)
+                IDLE: begin
+                    input_ready <= 1'b1;
+                    weight_ready <= 1'b1;
+                    acc_rst <= 1'b1;
+                    if (input_valid && weight_valid) begin
+                        input_reg <= input_data;
+                        weight_reg <= weight_data;
+                        acc_rst <= 1'b0;
+                        pe_state <= LOAD;
+                    end
+                end
+                
+                LOAD: begin
+                    input_ready <= 1'b0;
+                    weight_ready <= 1'b0;
+                    pe_state <= COMPUTE;
+                end
+                
+                COMPUTE: begin
+                    acc_rst <= 1'b0;
+                    if (mac_done) begin
+                        acc_reg <= mac_acc_out;
+                        pe_state <= ACTIVATE;
+                    end
+                end
+                
+                ACTIVATE: begin
+                    pe_state <= OUTPUT;
+                end
+                
+                OUTPUT: begin
+                    if (output_ready) begin
+                        pe_state <= IDLE;
+                    end
+                end
+                
+                default: begin
+                    pe_state <= IDLE;
+                    input_ready <= 1'b1;
+                    weight_ready <= 1'b1;
+                end
+            endcase
+        end
+    end
 
     pe_register_file u_pe_register_file (
         .clk(clk),

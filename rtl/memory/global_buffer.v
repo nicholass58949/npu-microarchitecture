@@ -13,17 +13,16 @@ module global_buffer (
     reg [15:0] memory [0:1024-1];
     reg [15:0] rdata_reg;
 
+    // Optimized: Synchronized read/write with correct 10-bit indexing
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             rdata_reg <= {16{1'b0}};
-        end else if (ce && !we) begin
-            rdata_reg <= memory[addr[32-1:0]];
-        end
-    end
-
-    always @(posedge clk) begin
-        if (ce && we) begin
-            memory[addr[32-1:0]] <= wdata;
+        end else if (ce) begin
+            if (we) begin
+                memory[addr[9:0]] <= wdata;  // FIX: 1KB = 2^10 addresses
+            end else begin
+                rdata_reg <= memory[addr[9:0]];  // FIX: Correct address width
+            end
         end
     end
 

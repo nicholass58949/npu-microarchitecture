@@ -47,7 +47,7 @@ $(BUILD_DIR):
 
 # Compile
 compile: $(BUILD_DIR) $(RTL_SOURCES) $(SIM_SOURCES)
-	$(IVERILOG) -o $(OUTPUT) -I $(COMMON_DIR) $(RTL_SOURCES) $(SIM_SOURCES)
+	$(IVERILOG) -g2012 -o $(OUTPUT) -I $(COMMON_DIR) $(RTL_SOURCES) $(SIM_SOURCES)
 
 # Simulate
 sim: compile

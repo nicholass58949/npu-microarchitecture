@@ -94,7 +94,7 @@ module instruction_scheduler (
                             dma_ce <= 1'b1;
                             dma_addr <= current_addr;
                             
-                            if (!dma_busy && dma_done) begin
+                            if (dma_done) begin  // FIX: Simplified completion check
                                 global_buffer_ce <= 1'b1;
                                 global_buffer_we <= 1'b1;
                                 global_buffer_addr <= current_addr;
@@ -102,7 +102,7 @@ module instruction_scheduler (
                                 
                                 if (data_counter < param1 - 1) begin
                                     data_counter <= data_counter + 1'b1;
-                                    current_addr <= current_addr + 2;
+                                    current_addr <= current_addr + 32'd2;  // 16-bit = 2 bytes
                                 end else begin
                                     state <= STATE_IDLE;
                                     task_valid <= 1'b1;
@@ -133,7 +133,7 @@ module instruction_scheduler (
                             
                             if (data_counter < param1 - 1) begin
                                 data_counter <= data_counter + 1'b1;
-                                current_addr <= current_addr + 2;
+                                current_addr <= current_addr + 32'd2;  // 16-bit = 2 bytes
                             end else begin
                                 state <= STATE_IDLE;
                                 task_valid <= 1'b1;

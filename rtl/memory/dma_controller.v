@@ -71,8 +71,8 @@ module dma_controller (
                 
                 WRITE_BUFFER: begin
                     transfer_count <= transfer_count + 1'b1;
-                    src_addr <= src_addr + 1'b1;
-                    dst_addr <= dst_addr + 1'b1;
+                    src_addr <= src_addr + 32'd2;  // FIX: 16-bit data = 2 bytes
+                    dst_addr <= dst_addr + 32'd2;  // FIX: 16-bit data = 2 bytes
                     
                     if (transfer_count >= transfer_size) begin
                         dma_state <= DONE;

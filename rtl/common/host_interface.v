@@ -41,12 +41,18 @@ module host_interface (
     reg [31:0] cmd_reg;
     reg cmd_valid_reg;
     
+    // Calculate next pointers (used in always block)
+    wire [3:0] cmd_wr_ptr_next = cmd_wr_ptr + 1'b1;
+    wire [3:0] cmd_rd_ptr_next = cmd_rd_ptr + 1'b1;
+    wire [3:0] resp_rd_ptr_next = resp_rd_ptr + 1'b1;
+    
     assign s_axis_tready = ~cmd_full;
     assign scheduler_cmd = cmd_reg;
     assign scheduler_valid = cmd_valid_reg;
     assign m_axis_tdata = resp_fifo[resp_rd_ptr];
     assign m_axis_tvalid = ~resp_empty;
-    assign m_axis_tlast = (resp_rd_ptr == resp_wr_ptr - 1);
+    // FIX: Correct m_axis_tlast logic for 4-bit pointers
+    assign m_axis_tlast = (resp_rd_ptr_next == resp_wr_ptr) && ~resp_empty;
     assign status = status_reg;
     assign interrupt_req = interrupt_req_reg;
     assign interrupt_id = interrupt_id_reg;
@@ -69,34 +75,47 @@ module host_interface (
             cmd_reg <= 32'd0;
             cmd_valid_reg <= 1'b0;
         end else begin
+            // Write command from AXI-Stream
             if (s_axis_tvalid && s_axis_tready) begin
                 cmd_fifo[cmd_wr_ptr] <= s_axis_tdata;
-                cmd_wr_ptr <= cmd_wr_ptr + 1'b1;
+                cmd_wr_ptr <= cmd_wr_ptr_next;
                 cmd_empty <= 1'b0;
-                if (cmd_wr_ptr == 4'd15) begin
+                // Full condition: next write pointer equals read pointer
+                if (cmd_wr_ptr_next == cmd_rd_ptr) begin
                     cmd_full <= 1'b1;
+                end else begin
+                    cmd_full <= 1'b0;
                 end
             end
             
+            // Acknowledge scheduler consumption
             if (scheduler_ready && cmd_valid_reg) begin
                 cmd_valid_reg <= 1'b0;
             end
             
+            // Read command from FIFO to scheduler
             if (~cmd_valid_reg && ~cmd_empty) begin
                 cmd_reg <= cmd_fifo[cmd_rd_ptr];
                 cmd_valid_reg <= 1'b1;
                 cmd_rd_ptr <= cmd_rd_ptr + 1'b1;
-                cmd_full <= 1'b0;
-                if (cmd_rd_ptr == 4'd15) begin
+                // Empty condition: next read pointer equals write pointer
+                if (cmd_rd_ptr_next == cmd_wr_ptr) begin
                     cmd_empty <= 1'b1;
+                end else begin
+                    cmd_empty <= 1'b0;
                 end
+                cmd_full <= 1'b0;
             end
             
+            // Read response from FIFO to AXI-Stream
             if (m_axis_tready && ~resp_empty) begin
-                resp_rd_ptr <= resp_rd_ptr + 1'b1;
+                resp_rd_ptr <= resp_rd_ptr_next;
                 resp_full <= 1'b0;
-                if (resp_rd_ptr == 4'd15) begin
+                // Empty condition: next read pointer equals write pointer
+                if (resp_rd_ptr_next == resp_wr_ptr) begin
                     resp_empty <= 1'b1;
+                end else begin
+                    resp_empty <= 1'b0;
                 end
             end
             
