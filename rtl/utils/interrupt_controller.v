@@ -1,5 +1,6 @@
 `include "../common/npu_definitions.vh"
 
+// Simplified Interrupt Controller
 module interrupt_controller (
     input wire clk,
     input wire rst_n,
@@ -12,7 +13,6 @@ module interrupt_controller (
 
     reg interrupt_ack_reg;
     reg interrupt_reg;
-    reg [7:0] interrupt_id_reg;
 
     assign interrupt_ack = interrupt_ack_reg;
     assign interrupt = interrupt_reg;
@@ -21,15 +21,11 @@ module interrupt_controller (
         if (!rst_n) begin
             interrupt_ack_reg <= 1'b0;
             interrupt_reg <= 1'b0;
-            interrupt_id_reg <= 8'd0;
         end else begin
             if (interrupt_req && !interrupt_ack_reg) begin
                 interrupt_ack_reg <= 1'b1;
                 interrupt_reg <= 1'b1;
-                interrupt_id_reg <= interrupt_id;
-            end
-            
-            if (interrupt_ack_reg) begin
+            end else if (interrupt_ack_reg) begin
                 interrupt_ack_reg <= 1'b0;
                 interrupt_reg <= 1'b0;
             end
